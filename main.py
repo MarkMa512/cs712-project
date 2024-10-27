@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
 from dataset import TestDataset, TrainDataset
-from model import SimpleModel
+from model import *
 
 
 def seed_everything(TORCH_SEED):
@@ -29,7 +29,18 @@ if __name__ == "__main__":
     seed = 123
 
     seed_everything(seed)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "mps" if torch.backends.mps.is_available() else "cpu"
+    # print("MPS available:", torch.backends.mps.is_available())
+
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
+
+    print(f"Using device: {device}")
 
     # train/val split
     train_set = TrainDataset()
@@ -40,7 +51,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
 
-    model = SimpleModel(batch_size=batch_size).to(device)
+    model = BiGRUModel(batch_size=batch_size).to(device)
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -98,6 +109,8 @@ if __name__ == "__main__":
             best_model = deepcopy(model.state_dict())
 
     model.load_state_dict(best_model)
+    # Ensure the 'trained_models' directory exists
+    os.makedirs("trained_models", exist_ok=True)
     torch.save(model.state_dict(), "trained_models/model.pth")
 
     ### generate predictions for public test
