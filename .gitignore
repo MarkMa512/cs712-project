@@ -6,3 +6,4 @@ trained_models
 __pycache__/
 *.zip
 *gru_mse*
+.DS_Store

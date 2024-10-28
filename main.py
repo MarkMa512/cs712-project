@@ -51,7 +51,10 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
 
-    model = BiGRUModel(batch_size=batch_size).to(device)
+    model = TransformerModel().to(device)
+
+    model_name = 'TransformerModel'
+
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -111,7 +114,7 @@ if __name__ == "__main__":
     model.load_state_dict(best_model)
     # Ensure the 'trained_models' directory exists
     os.makedirs("trained_models", exist_ok=True)
-    torch.save(model.state_dict(), "trained_models/model.pth")
+    torch.save(model.state_dict(), f"trained_models/model_{model_name}.pth")
 
     ### generate predictions for public test
     test_set = TestDataset()
@@ -132,7 +135,7 @@ if __name__ == "__main__":
 
     combined_preds = np.concatenate([np.array(pred_labels), np.array(next_points)], axis=1)
     # save predictions
-    file_name = "gru_mse"
+    file_name = f"gru_mse_{model_name}"
     np.savetxt(file_name + ".txt", combined_preds, fmt="%.8f")
     with zipfile.ZipFile(file_name + ".zip", "w") as f:
         f.write(file_name + ".txt")
