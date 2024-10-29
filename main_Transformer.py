@@ -9,8 +9,8 @@ import torch
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
-from dataset import TestDataset, TrainDataset
-from model import *
+from dataset_own import TestDataset, TrainDataset
+from model import TransformerModel
 
 
 def seed_everything(TORCH_SEED):
@@ -24,14 +24,12 @@ def seed_everything(TORCH_SEED):
 
 
 if __name__ == "__main__":
-    batch_size = 128
+    batch_size = 256
     n_epochs = 10
     seed = 123
+    dropout=0.001
 
     seed_everything(seed)
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
-    # device = "mps" if torch.backends.mps.is_available() else "cpu"
-    # print("MPS available:", torch.backends.mps.is_available())
 
     if torch.cuda.is_available():
         device = "cuda"

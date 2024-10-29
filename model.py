@@ -79,17 +79,6 @@ class LSTMModel(nn.Module):
         if return_hidden:
             return scores.squeeze(0), hidden.squeeze(0)
         return scores.squeeze(0)
-    
-class OptimizedLSTMModel(nn.Module):
-    def __init__(self, input_size=1280, hidden_size=2560, n_layers=2, dropout=0.3):
-        super(OptimizedLSTMModel, self).__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers=n_layers, dropout=dropout, batch_first=True)
-        self.fc = nn.Linear(hidden_size, 3)  # Assuming 3 candidates for scoring
-
-    def forward(self, x):
-        output, (hidden, _) = self.lstm(x)
-        output = self.fc(hidden[-1])  # Using the last hidden layer
-        return output
 
 class TransformerModel(nn.Module):
     """Modified Transformer-based Model to output the original hidden size."""
