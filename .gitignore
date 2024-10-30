@@ -6,5 +6,4 @@ trained_models
 __pycache__/
 *.zip
 *gru_mse*
-.DS_Store
 group_pj_zhihan_v2/
