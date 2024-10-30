@@ -84,22 +84,22 @@ class TransformerModel(nn.Module):
     """Modified Transformer-based Model to output the original hidden size."""
     def __init__(self, input_size=1280, hidden_size=1280, nhead=8, num_layers=2, candidate_len=3):
         super(TransformerModel, self).__init__()
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=input_size, nhead=nhead)
+        # Set batch_first=True for compatibility
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=input_size, nhead=nhead, batch_first=True)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
-        # Optional linear layer to ensure output size remains as 1280 features
-        self.hidden_reduction = nn.Linear(input_size, hidden_size)
+        self.hidden_reduction = nn.Linear(input_size, hidden_size)  # Ensures output matches the expected dimension
 
     def forward(self, seq, candidates, return_hidden=False):
         # Encode the sequence
-        encoded_seq = self.transformer_encoder(seq)
-        last_hidden = encoded_seq[:, -1, :]  # Last hidden state
-        
+        encoded_seq = self.transformer_encoder(seq)  # Shape: [batch_size, seq_len, hidden_size]
+        last_hidden = encoded_seq[:, -1, :]  # Last hidden state, Shape: [batch_size, hidden_size]
+
         # Reduce to original hidden size if necessary
-        last_hidden = self.hidden_reduction(last_hidden)  # Ensures last_hidden has shape [batch_size, 1280]
-        
+        last_hidden = self.hidden_reduction(last_hidden)  # Shape: [batch_size, input_size]
+
         # Compute similarity scores
-        scores = torch.einsum("...d,bcd->...c", last_hidden.unsqueeze(1), candidates)
+        scores = torch.einsum("bd,bcd->bc", last_hidden, candidates)
         
         if return_hidden:
-            return scores.squeeze(0), last_hidden
-        return scores.squeeze(0)
+            return scores, last_hidden
+        return scores
